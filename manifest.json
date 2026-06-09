@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "ALMA Calculator",
+  "description": "Soft Cryo dashboard for Alma mastery grades, IB GPA, and school-year comparisons.",
+  "version": "1.0.0",
+  "permissions": ["storage", "activeTab", "scripting", "tabs"],
+  "host_permissions": ["https://*.getalma.com/*"],
+  "action": {
+    "default_title": "ALMA Calculator",
+    "default_popup": "popup.html"
+  },
+  "options_page": "options.html",
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*.getalma.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "16": "assets/icons/icon16.png",
+    "48": "assets/icons/icon48.png",
+    "128": "assets/icons/icon128.png"
+  }
+}

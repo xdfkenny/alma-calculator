@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ALMA Calculator</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <main class="popup-shell" aria-live="polite">
+      <div class="frost-noise" aria-hidden="true"></div>
+
+      <header class="popup-header">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48" role="img">
+            <path d="M24 3 42.2 13.5v21L24 45 5.8 34.5v-21L24 3Z"></path>
+            <path d="M24 11v26M13.5 17.5l21 13M34.5 17.5l-21 13M16 24h16"></path>
+          </svg>
+        </div>
+        <div>
+          <h1>ALMA Calculator</h1>
+          <p id="lastSyncText">Soft Cryo Alma dashboard</p>
+        </div>
+        <button class="icon-button" id="optionsButton" type="button" aria-label="Open options" title="Open options">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5Z"></path>
+            <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2a2 2 0 1 1-4 0V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1A2 2 0 1 1 4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H3a2 2 0 1 1 0-4h.2a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.4 7A2 2 0 1 1 7.2 4.2l.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6V3a2 2 0 1 1 4 0v.2a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1A2 2 0 1 1 20 7.2l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2a2 2 0 1 1 0 4h-.2a1.7 1.7 0 0 0-1.8 1Z"></path>
+          </svg>
+        </button>
+        <div class="snowfall" aria-hidden="true">
+          <i></i><i></i><i></i><i></i><i></i>
+        </div>
+      </header>
+
+      <section class="status-row" aria-label="Connection status">
+        <span class="status-pill" id="statusPill">
+          <span class="status-dot"></span>
+          <span id="statusText">Idle</span>
+        </span>
+        <button class="icon-button sync-button" id="syncIconButton" type="button" aria-label="Refresh grades" title="Refresh grades">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M21 12a9 9 0 0 1-15.3 6.4L3 16"></path>
+            <path d="M3 16v5h5"></path>
+            <path d="M3 12A9 9 0 0 1 18.3 5.6L21 8"></path>
+            <path d="M21 8V3h-5"></path>
+          </svg>
+        </button>
+      </section>
+
+      <section class="message-banner hidden" id="messageBanner" role="status"></section>
+
+      <section class="stats-grid" aria-label="Grade summary">
+        <article class="stat-card">
+          <div class="stat-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 3 20 7.5v9L12 21l-8-4.5v-9L12 3Z"></path>
+              <path d="M12 8v8M8.5 10l7 4M15.5 10l-7 4"></path>
+            </svg>
+          </div>
+          <span class="stat-number" id="gpaStat">--</span>
+          <span class="stat-label">GPA</span>
+        </article>
+        <article class="stat-card">
+          <div class="stat-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M4 19V5"></path>
+              <path d="M8 19v-7"></path>
+              <path d="M12 19V9"></path>
+              <path d="M16 19v-4"></path>
+              <path d="M20 19V7"></path>
+            </svg>
+          </div>
+          <span class="stat-number" id="avgStat">--</span>
+          <span class="stat-label">Average</span>
+        </article>
+        <article class="stat-card">
+          <div class="stat-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M7 4h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"></path>
+              <path d="M8 8h8M8 12h8M8 16h5"></path>
+            </svg>
+          </div>
+          <span class="stat-number" id="classStat">0</span>
+          <span class="stat-label">Classes</span>
+        </article>
+        <article class="stat-card">
+          <div class="stat-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 21s7-4.4 7-11V5l-7-3-7 3v5c0 6.6 7 11 7 11Z"></path>
+              <path d="m9 12 2 2 4-5"></path>
+            </svg>
+          </div>
+          <span class="stat-number" id="includedStat">0</span>
+          <span class="stat-label">Included</span>
+        </article>
+      </section>
+
+      <section class="classes-section" aria-labelledby="classesTitle">
+        <div class="section-heading">
+          <h2 id="classesTitle">Classes</h2>
+          <span id="classCountText">0 found</span>
+        </div>
+        <div class="class-list" id="classList"></div>
+      </section>
+
+      <section class="years-section" aria-labelledby="yearsTitle">
+        <div class="section-heading">
+          <h2 id="yearsTitle">Years</h2>
+          <span id="yearDeltaText">No comparison</span>
+        </div>
+        <div class="year-comparison" id="yearComparison"></div>
+      </section>
+
+      <footer class="actions">
+        <button class="primary-button" id="syncButton" type="button">
+          <span class="button-spinner hidden" aria-hidden="true"></span>
+          <span id="syncButtonText">Recalculate</span>
+        </button>
+        <button class="secondary-button" id="compareButton" type="button">Years</button>
+        <button class="secondary-button compact" id="almaButton" type="button" aria-label="Go to Alma" title="Go to Alma">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M7 17 17 7"></path>
+            <path d="M8 7h9v9"></path>
+          </svg>
+        </button>
+      </footer>
+      <button class="text-button" id="loginButton" type="button">Log in to Alma</button>
+    </main>
+
+    <template id="emptyStateTemplate">
+      <div class="empty-state">
+        <div class="empty-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 3 19 7v10l-7 4-7-4V7l7-4Z"></path>
+            <path d="M9 9h6M9 13h4"></path>
+          </svg>
+        </div>
+        <h3>No grade data yet</h3>
+        <p>Log in, then refresh to collect Alma mastery grades.</p>
+      </div>
+    </template>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

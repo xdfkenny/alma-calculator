@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ALMA Calculator Options</title>
+    <link rel="stylesheet" href="options.css">
+  </head>
+  <body>
+    <main class="options-shell">
+      <div class="frost-noise" aria-hidden="true"></div>
+
+      <header class="options-header">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48">
+            <path d="M24 3 42.2 13.5v21L24 45 5.8 34.5v-21L24 3Z"></path>
+            <path d="M24 11v26M13.5 17.5l21 13M34.5 17.5l-21 13M16 24h16"></path>
+          </svg>
+        </div>
+        <div>
+          <h1>ALMA Calculator Settings</h1>
+          <p>Alma credentials, exclusions, and mastery preferences</p>
+        </div>
+      </header>
+
+      <section class="panel" aria-labelledby="portalTitle">
+        <div class="panel-heading">
+          <h2 id="portalTitle">Alma Portal</h2>
+          <span>Stored locally</span>
+        </div>
+
+        <form id="portalForm" class="settings-form">
+          <label class="field">
+            <span>Portal URL</span>
+            <input id="almaOriginInput" name="almaOrigin" type="url" inputmode="url" autocomplete="url" placeholder="https://your-school.getalma.com">
+          </label>
+
+          <div class="form-actions">
+            <button class="primary-button" type="submit">Save Portal</button>
+            <button class="secondary-button" id="clearPortalButton" type="button">Clear</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel" aria-labelledby="credentialsTitle">
+        <div class="panel-heading">
+          <h2 id="credentialsTitle">Credentials</h2>
+          <span>Stored locally</span>
+        </div>
+
+        <form id="credentialsForm" class="settings-form">
+          <label class="field">
+            <span>Username</span>
+            <input id="usernameInput" name="username" type="text" autocomplete="username" placeholder="user">
+          </label>
+
+          <label class="field">
+            <span>Password</span>
+            <span class="password-wrap">
+              <input id="passwordInput" name="password" type="password" autocomplete="current-password" placeholder="Enter Alma password">
+              <button class="icon-button inline" id="togglePasswordButton" type="button" aria-label="Show password" title="Show password">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z"></path>
+                  <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"></path>
+                </svg>
+              </button>
+            </span>
+          </label>
+
+          <div class="form-actions">
+            <button class="primary-button" type="submit">Save Credentials</button>
+            <button class="secondary-button" id="clearCredentialsButton" type="button">Clear</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel" aria-labelledby="preferencesTitle">
+        <div class="panel-heading">
+          <h2 id="preferencesTitle">Class Preferences</h2>
+          <span id="classCountText">0 classes</span>
+        </div>
+        <div class="preference-list" id="preferenceList"></div>
+        <button class="secondary-button full" id="resetPreferencesButton" type="button">Reset Class Preferences</button>
+      </section>
+
+      <section class="notice hidden" id="notice" role="status"></section>
+    </main>
+
+    <template id="emptyPreferencesTemplate">
+      <div class="empty-state">
+        <div class="empty-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 3 19 7v10l-7 4-7-4V7l7-4Z"></path>
+            <path d="M8.5 10h7M8.5 14h5"></path>
+          </svg>
+        </div>
+        <h3>No cached classes yet</h3>
+        <p>Refresh the popup after logging in to populate class overrides.</p>
+      </div>
+    </template>
+
+    <script src="options.js"></script>
+  </body>
+</html>
