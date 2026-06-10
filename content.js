@@ -146,9 +146,11 @@
     const criteria = extractCriteria(masteryRoot, masteryText);
     const maxScore = detectMaxScore(masteryText, criteria, title);
     const finalMastery = extractFinalMastery(masteryText);
+    const periodTabs = discoverClassPeriodTabs(classInfo, title);
 
     return {
       ok: true,
+      periodTabs,
       grade: {
         ...parseClassIdentity(location.href),
         classId: classInfo.classId || parseClassIdentity(location.href)?.classId || extractClassIdFromUrl(location.href),
@@ -495,10 +497,56 @@
   }
 
   function extractSelectedPeriodLabel() {
-    const selected = normalizeAcademicPeriodLabel(document.querySelector(".sc-tabmenu .pure-menu-selected a, .sc-tabmenu [aria-selected='true']")?.textContent);
-    if (selected) return selected;
+    const selectedCandidates = Array.from(document.querySelectorAll([
+      ".sc-tabmenu .pure-menu-selected a",
+      ".pure-menu-list .pure-menu-selected a",
+      ".pure-menu-selected a",
+      ".sc-tabmenu [aria-selected='true']",
+      "[aria-selected='true']"
+    ].join(",")));
+
+    for (const candidate of selectedCandidates) {
+      if (candidate.matches?.("a[href]") && !parseClassIdentity(candidate.href)) continue;
+      const label = normalizeAcademicPeriodLabel(candidate.textContent);
+      if (label) return label;
+    }
+
     const identity = parseClassIdentity(location.href);
     return identity?.periodLabel || "";
+  }
+
+  function discoverClassPeriodTabs(classInfo = {}, title = "") {
+    const tabs = new Map();
+    const activeYear = detectActiveSchoolYear();
+    const anchors = Array.from(document.querySelectorAll([
+      ".sc-tabmenu a[href]",
+      ".pure-menu-list a[href]",
+      "a[href*='/home/class/'][href*='period=']"
+    ].join(",")));
+
+    anchors.forEach((anchor) => {
+      const absoluteUrl = new URL(anchor.getAttribute("href"), location.origin);
+      const identity = parseClassIdentity(absoluteUrl.href);
+      if (!identity?.periodId) return;
+
+      if (!absoluteUrl.searchParams.has("back")) {
+        absoluteUrl.searchParams.set("back", "/home/schedule");
+      }
+
+      const periodLabel = extractPeriodLabel(anchor) || identity.periodLabel;
+      tabs.set(identity.classId, {
+        ...identity,
+        className: title || classInfo.className || `Class ${identity.routeClassId}`,
+        teacherName: extractTeacherName(document) || classInfo.teacherName || "",
+        url: absoluteUrl.href,
+        periodLabel,
+        yearLabel: activeYear?.label || classInfo.yearLabel || "",
+        yearKey: activeYear?.key || classInfo.yearKey || "",
+        selected: Boolean(anchor.closest(".pure-menu-selected, .selected, .active") || anchor.matches("[aria-selected='true']"))
+      });
+    });
+
+    return Array.from(tabs.values());
   }
 
   function extractClassNameFromContext(contextElement) {

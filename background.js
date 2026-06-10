@@ -275,21 +275,38 @@ async function scrapeScheduleSnapshot(tabId, preferredYear = null) {
   }
 
   const classes = [];
-  const discoveredClasses = discovery.classes || [];
   const year = normalizeYear(discovery.activeYear || preferredYear);
+  const pendingClasses = (discovery.classes || []).map((classInfo) => ({
+    ...classInfo,
+    yearKey: year.key,
+    yearLabel: year.label
+  }));
+  const queuedClassIds = new Set(pendingClasses.map(classInfoKey));
 
-  for (const classInfo of discoveredClasses) {
-    const gradeResponse = await scrapeClassWithRetry(tabId, {
-      ...classInfo,
-      yearKey: year.key,
-      yearLabel: year.label
-    });
+  for (let index = 0; index < pendingClasses.length; index += 1) {
+    const classInfo = pendingClasses[index];
+    const gradeResponse = await scrapeClassWithRetry(tabId, classInfo);
     classes.push(normalizeClassGrade({
       ...classInfo,
       yearKey: year.key,
       yearLabel: year.label,
       ...(gradeResponse.grade || {})
     }));
+
+    (gradeResponse.periodTabs || []).forEach((periodTab) => {
+      const nextClassInfo = {
+        ...classInfo,
+        ...periodTab,
+        className: periodTab.className || classInfo.className,
+        teacherName: periodTab.teacherName || classInfo.teacherName || "",
+        yearKey: year.key,
+        yearLabel: year.label
+      };
+      const key = classInfoKey(nextClassInfo);
+      if (queuedClassIds.has(key)) return;
+      queuedClassIds.add(key);
+      pendingClasses.push(nextClassInfo);
+    });
   }
 
   return {
@@ -297,6 +314,12 @@ async function scrapeScheduleSnapshot(tabId, preferredYear = null) {
     classes,
     summary: calculateSummary(classes.map((classGrade) => withDerivedGrades(classGrade, {})), [])
   };
+}
+
+function classInfoKey(classInfo) {
+  if (classInfo?.classId) return String(classInfo.classId);
+  if (classInfo?.routeClassId && classInfo?.periodId) return `${classInfo.routeClassId}:${classInfo.periodId}`;
+  return String(classInfo?.url || "");
 }
 
 async function scrapeClassWithRetry(tabId, classInfo) {
