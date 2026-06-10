@@ -25,7 +25,9 @@ const previewStore = {
     }
   ],
   excludedClassIds: ["tok"],
-  ibOverrides: {}
+  ibOverrides: {},
+  targetGpa: 3.5,
+  watchAverage: 5
 };
 
 const elements = {};
@@ -49,6 +51,10 @@ function cacheElements() {
     "passwordInput",
     "togglePasswordButton",
     "clearCredentialsButton",
+    "goalsForm",
+    "targetGpaInput",
+    "watchAverageInput",
+    "resetGoalsButton",
     "preferenceList",
     "classCountText",
     "resetPreferencesButton",
@@ -65,11 +71,21 @@ function wireEvents() {
   elements.credentialsForm.addEventListener("submit", saveCredentials);
   elements.clearCredentialsButton.addEventListener("click", clearCredentials);
   elements.togglePasswordButton.addEventListener("click", togglePasswordVisibility);
+  elements.goalsForm.addEventListener("submit", saveStudentGoals);
+  elements.resetGoalsButton.addEventListener("click", resetStudentGoals);
   elements.resetPreferencesButton.addEventListener("click", resetPreferences);
 }
 
 async function loadOptions() {
-  const stored = await getStorage(["almaOrigin", "credentials", "classes", "excludedClassIds", "ibOverrides"]);
+  const stored = await getStorage([
+    "almaOrigin",
+    "credentials",
+    "classes",
+    "excludedClassIds",
+    "ibOverrides",
+    "targetGpa",
+    "watchAverage"
+  ]);
   const credentials = stored.credentials || {};
   classes = stored.classes || [];
   excludedClassIds = stored.excludedClassIds || [];
@@ -78,6 +94,8 @@ async function loadOptions() {
   elements.almaOriginInput.value = stored.almaOrigin || "";
   elements.usernameInput.value = credentials.username || "";
   elements.passwordInput.value = credentials.password || "";
+  elements.targetGpaInput.value = formatNumber(clampNumber(stored.targetGpa, 0, 4, previewStore.targetGpa), 1);
+  elements.watchAverageInput.value = formatNumber(clampNumber(stored.watchAverage, 0, 8, previewStore.watchAverage), 1);
 
   renderPreferences();
 }
@@ -132,6 +150,40 @@ function togglePasswordVisibility() {
   elements.togglePasswordButton.title = isPassword ? "Hide password" : "Show password";
 }
 
+async function saveStudentGoals(event) {
+  event.preventDefault();
+  const goals = readStudentGoals();
+
+  elements.targetGpaInput.value = formatNumber(goals.targetGpa, 1);
+  elements.watchAverageInput.value = formatNumber(goals.watchAverage, 1);
+
+  const response = await saveGoals(goals);
+  if (!response.ok) {
+    showNotice(response.error || "Could not save academic goals.", true);
+    return;
+  }
+
+  showNotice("Academic goals saved.");
+}
+
+async function resetStudentGoals() {
+  const goals = {
+    targetGpa: previewStore.targetGpa,
+    watchAverage: previewStore.watchAverage
+  };
+
+  elements.targetGpaInput.value = formatNumber(goals.targetGpa, 1);
+  elements.watchAverageInput.value = formatNumber(goals.watchAverage, 1);
+
+  const response = await saveGoals(goals);
+  if (!response.ok) {
+    showNotice(response.error || "Could not reset academic goals.", true);
+    return;
+  }
+
+  showNotice("Academic goals reset.");
+}
+
 async function resetPreferences() {
   excludedClassIds = [];
   ibOverrides = {};
@@ -154,6 +206,30 @@ async function updateExcluded(classId, isExcluded) {
   await setStorage({ excludedClassIds });
   showNotice("Class exclusion updated.");
   renderPreferences();
+}
+
+function readStudentGoals() {
+  return {
+    targetGpa: clampNumber(elements.targetGpaInput.value, 0, 4, previewStore.targetGpa),
+    watchAverage: clampNumber(elements.watchAverageInput.value, 0, 8, previewStore.watchAverage)
+  };
+}
+
+async function saveGoals(goals) {
+  if (typeof chrome !== "undefined" && chrome.runtime?.sendMessage) {
+    try {
+      const response = await chrome.runtime.sendMessage({
+        type: "SET_STUDENT_GOALS",
+        goals
+      });
+      return response || { ok: true };
+    } catch (error) {
+      return { ok: false, error: error?.message || "Could not reach extension background." };
+    }
+  }
+
+  await setStorage(goals);
+  return { ok: true };
 }
 
 async function updateIbOverride(classId, value) {
@@ -275,6 +351,21 @@ function formatNumber(value, digits) {
   return typeof value === "number" && Number.isFinite(value)
     ? value.toFixed(digits)
     : "--";
+}
+
+function clampNumber(value, min, max, fallback) {
+  const numeric = toNullableNumber(value);
+  if (typeof numeric !== "number" || !Number.isFinite(numeric)) return fallback;
+  return Math.min(max, Math.max(min, numeric));
+}
+
+function toNullableNumber(value) {
+  if (value === null || value === undefined || value === "") return null;
+  if (typeof value === "number") return Number.isFinite(value) ? value : null;
+  const match = String(value).replace(",", ".").match(/-?\d+(?:\.\d+)?/);
+  if (!match) return null;
+  const numeric = Number(match[0]);
+  return Number.isFinite(numeric) ? numeric : null;
 }
 
 function normalizeAlmaOrigin(value) {

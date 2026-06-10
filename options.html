@@ -74,6 +74,32 @@
         </form>
       </section>
 
+      <section class="panel" aria-labelledby="goalsTitle">
+        <div class="panel-heading">
+          <h2 id="goalsTitle">Academic Goals</h2>
+          <span>Used in Focus</span>
+        </div>
+
+        <form id="goalsForm" class="settings-form">
+          <div class="goal-fields">
+            <label class="field">
+              <span>Target GPA</span>
+              <input id="targetGpaInput" name="targetGpa" type="number" min="0" max="4" step="0.1" inputmode="decimal">
+            </label>
+
+            <label class="field">
+              <span>Watch average</span>
+              <input id="watchAverageInput" name="watchAverage" type="number" min="0" max="8" step="0.1" inputmode="decimal">
+            </label>
+          </div>
+
+          <div class="form-actions">
+            <button class="primary-button" type="submit">Save Goals</button>
+            <button class="secondary-button" id="resetGoalsButton" type="button">Reset</button>
+          </div>
+        </form>
+      </section>
+
       <section class="panel" aria-labelledby="preferencesTitle">
         <div class="panel-heading">
           <h2 id="preferencesTitle">Class Preferences</h2>

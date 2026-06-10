@@ -35,12 +35,14 @@ html,
 body {
   width: 380px;
   min-height: 500px;
+  max-height: 640px;
   margin: 0;
   background: var(--bg);
   color: var(--fg);
   font-family: var(--body-font);
   font-size: 14px;
   line-height: 1.45;
+  overflow: auto;
 }
 
 button,
@@ -62,7 +64,7 @@ input:focus-visible {
   position: relative;
   width: 380px;
   min-height: 500px;
-  overflow: hidden;
+  overflow: visible;
   padding: 20px;
   background:
     radial-gradient(circle at 12% 0%, rgba(184, 227, 245, 0.72), transparent 34%),
@@ -250,7 +252,7 @@ h1 {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
-  margin: 14px 0 16px;
+  margin: 14px 0 14px;
 }
 
 .stat-card {
@@ -313,6 +315,153 @@ h2 {
   font-weight: 700;
 }
 
+.focus-section,
+.semesters-section,
+.criteria-section,
+.classes-section,
+.years-section {
+  margin-top: 14px;
+}
+
+.focus-panel,
+.criteria-summary,
+.year-comparison {
+  display: grid;
+  gap: 8px;
+}
+
+.focus-goal {
+  display: grid;
+  gap: 8px;
+  min-height: 62px;
+  padding: 10px;
+  background: var(--bg-warm);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+.focus-goal.met {
+  border-color: rgba(108, 191, 167, 0.55);
+  background: linear-gradient(135deg, rgba(225, 245, 254, 0.78), rgba(248, 251, 255, 0.95));
+}
+
+.focus-goal-head,
+.goal-plan-header,
+.focus-row,
+.semester-card,
+.criterion-summary-row,
+.year-row,
+.year-empty,
+.compact-empty {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.focus-goal-head span,
+.goal-plan-header span,
+.focus-row span,
+.semester-label,
+.criterion-summary-label {
+  color: var(--fg-muted);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.focus-goal-head strong,
+.goal-plan-header strong,
+.focus-row strong,
+.semester-card strong,
+.criterion-summary-row strong {
+  color: var(--fg);
+  font-family: var(--mono-font);
+  font-size: 12px;
+  font-weight: 900;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.focus-row strong {
+  max-width: 210px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.goal-meter,
+.criterion-bar {
+  position: relative;
+  overflow: hidden;
+  height: 7px;
+  background: rgba(197, 227, 245, 0.8);
+  border-radius: var(--radius-full);
+}
+
+.goal-meter span,
+.criterion-bar span {
+  display: block;
+  height: 100%;
+  min-width: 4px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-dark));
+  border-radius: inherit;
+}
+
+.focus-list,
+.goal-plan,
+.semester-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.goal-plan {
+  padding-top: 2px;
+}
+
+.focus-row,
+.semester-card,
+.criterion-summary-row,
+.compact-empty {
+  min-height: 34px;
+  padding: 8px 10px;
+  background: rgba(248, 251, 255, 0.78);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.semester-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.semester-card {
+  display: grid;
+  align-items: start;
+  gap: 4px;
+}
+
+.semester-card strong {
+  text-align: left;
+  font-size: 18px;
+}
+
+.semester-card > span:last-child,
+.compact-empty {
+  color: var(--fg-muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.criterion-summary-row {
+  display: grid;
+  grid-template-columns: 22px 1fr 38px;
+}
+
+.criterion-summary-row.weak {
+  border-color: rgba(232, 165, 165, 0.72);
+  background: rgba(255, 243, 246, 0.7);
+}
+
 .class-list {
   display: grid;
   gap: 10px;
@@ -322,21 +471,8 @@ h2 {
   scrollbar-color: var(--accent-light) transparent;
 }
 
-.years-section {
-  margin-top: 14px;
-}
-
-.year-comparison {
-  display: grid;
-  gap: 8px;
-}
-
 .year-row,
 .year-empty {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
   min-height: 34px;
   padding: 7px 9px;
   background: rgba(248, 251, 255, 0.78);
@@ -386,6 +522,10 @@ h2 {
   border-style: dashed;
 }
 
+.class-card.watch {
+  border-color: rgba(232, 165, 165, 0.72);
+}
+
 .class-title {
   color: var(--fg);
   font-size: 14px;
@@ -408,7 +548,8 @@ h2 {
 
 .criterion-pill,
 .excluded-pill,
-.ib-pill {
+.ib-pill,
+.watch-pill {
   display: inline-flex;
   align-items: center;
   min-height: 24px;
@@ -428,6 +569,11 @@ h2 {
 .excluded-pill {
   color: #7E5060;
   background: var(--rose-ice);
+}
+
+.watch-pill {
+  color: #7E5060;
+  background: var(--error-bg);
 }
 
 .ib-pill {

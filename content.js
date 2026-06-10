@@ -476,14 +476,26 @@
   }
 
   function extractPeriodLabel(anchor) {
-    const text = cleanText(anchor?.textContent);
-    if (/^(S\d|Q\d|T\d|P\d)$/i.test(text)) return text.toUpperCase();
-    const match = String(anchor?.href || "").match(/[?&]period=([^&#]+)/);
-    return match ? "Period" : "";
+    const contextElement = getMeaningfulContextElement(anchor);
+    const candidates = [
+      anchor?.textContent,
+      anchor?.getAttribute?.("aria-label"),
+      anchor?.getAttribute?.("title"),
+      contextElement?.querySelector?.("[aria-selected='true'], .selected, .active")?.textContent,
+      contextElement?.textContent
+    ];
+
+    for (const candidate of candidates) {
+      const label = normalizeAcademicPeriodLabel(candidate);
+      if (label) return label;
+    }
+
+    const parsed = parseClassIdentity(anchor?.href || "");
+    return parsed?.periodLabel || "";
   }
 
   function extractSelectedPeriodLabel() {
-    const selected = cleanText(document.querySelector(".sc-tabmenu .pure-menu-selected a, .sc-tabmenu [aria-selected='true']")?.textContent);
+    const selected = normalizeAcademicPeriodLabel(document.querySelector(".sc-tabmenu .pure-menu-selected a, .sc-tabmenu [aria-selected='true']")?.textContent);
     if (selected) return selected;
     const identity = parseClassIdentity(location.href);
     return identity?.periodLabel || "";
@@ -558,8 +570,58 @@
       classId: periodId ? `${routeClassId}:${periodId}` : routeClassId,
       routeClassId,
       periodId,
-      periodLabel: periodId ? "Period" : ""
+      periodLabel: periodId ? periodLabelFromId(periodId) : ""
     };
+  }
+
+  function normalizeAcademicPeriodLabel(value) {
+    const clean = cleanText(value);
+    if (!clean) return "";
+
+    const compact = clean.match(/\b([SQTP])\s*([1-4])\b/i);
+    if (compact) {
+      return `${compact[1].toUpperCase()}${compact[2]}`;
+    }
+
+    const named = clean.match(/\b(semester|sem|quarter|term|trimester|period)\s*([1-4])\b/i) ||
+      clean.match(/\b([1-4])(?:st|nd|rd|th)?\s*(semester|quarter|term|trimester|period)\b/i);
+    if (named) {
+      const first = Number.isFinite(Number(named[1])) ? named[2] : named[1];
+      const second = Number.isFinite(Number(named[1])) ? named[1] : named[2];
+      return `${periodWord(first)} ${second}`;
+    }
+
+    const ordinal = clean.match(/\b(first|second|third|fourth)\s+(semester|quarter|term|trimester|period)\b/i);
+    if (ordinal) {
+      return `${periodWord(ordinal[2])} ${ordinalNumber(ordinal[1])}`;
+    }
+
+    return "";
+  }
+
+  function periodLabelFromId(periodId) {
+    const decoded = decodeURIComponent(String(periodId || "").replace(/\+/g, " "));
+    const explicit = normalizeAcademicPeriodLabel(decoded);
+    if (explicit) return explicit;
+
+    const numeric = decoded.match(/\b([1-4])\b/);
+    return numeric ? `Period ${numeric[1]}` : "Period";
+  }
+
+  function periodWord(value) {
+    const clean = String(value || "").toLowerCase();
+    if (clean === "sem") return "Semester";
+    if (clean === "trimester") return "Term";
+    return clean ? clean.charAt(0).toUpperCase() + clean.slice(1) : "Period";
+  }
+
+  function ordinalNumber(value) {
+    const clean = String(value || "").toLowerCase();
+    if (clean === "first") return "1";
+    if (clean === "second") return "2";
+    if (clean === "third") return "3";
+    if (clean === "fourth") return "4";
+    return "";
   }
 
   function climbToDenseRegion(element) {
